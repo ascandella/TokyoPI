@@ -1,0 +1,72 @@
+default: &defaults
+  log: tokyopi.log
+  log_level: info
+  default_template: template/report.erb
+
+  reports:
+    default:
+      name: Example Graphite Report for $date
+      heading: Example Report
+      dashboards:
+        - Example Dashboard
+      graphs:
+        from: -24h
+        until: now
+
+  mail:
+    server: mail. # your mailserver's hostname here
+    from: tokyopi@ # your domain here
+
+  email:
+    image_display_method: s3
+    theme:
+      width: 870
+
+  graphs:
+    lineWidth: 2
+    height: 600
+    template: alphas
+    width: 800
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
+  reports:
+    daily:
+      name: Daily Metrics Report for $date
+      heading: Daily Metrics
+      dashboards:
+        - Core Server
+        - Error Rates
+      graphs:
+        from: -24h
+        until: now
+    weekly:
+      name: Weekly Metrics Report
+      name: Weekly Metrics Report for $date
+      heading: Weekly Metrics
+      dashboards:
+        - Core Server
+        - Error Rates
+        - Frontend
+      graphs:
+        from: -1weeks
+        until: now
+
+development:
+  <<: *defaults
+
+  debug: true
+  log_level: debug
+  log: log/tokyopi.log
+  recipient: recipient@ # your domain here
+  graphite:
+    host: graphite. # your domain here, e.g. 'graphite.foo.com'
+
+  s3:
+    bucket: # bucket name
+    access_key: # access key
+    secret_access_key: # secret key
+

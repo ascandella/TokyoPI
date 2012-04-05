@@ -25,14 +25,12 @@ describe TokyoPI::Graphite::Graph do
     conf = test_config
     conf.merge!({
       'graphs' => {
-        'foo' => 500,
         'target' => 'pluto'
       }
     })
-    # Note: This may not be a good test, as it depends on hash-ordering
     TokyoPI::Graphite::Graph.new(conf, [nil, nil,
-      '/render?foo=300&target=baz&aoeu=ueoa'
-    ]).url.should == '/render?foo=500&target=pluto&aoeu=ueoa'
+      '/render?target=mars'
+    ]).url.should == '/render?target=pluto'
   end
 
   it 'should prefer override values from a report' do
@@ -49,10 +47,31 @@ describe TokyoPI::Graphite::Graph do
         'foo' => 500,
       }
     })
-    # Note: This may not be a good test, as it depends on hash-ordering
     TokyoPI::Graphite::Graph.new(conf, [nil, nil,
-      '/render?foo=300&target=baz&aoeu=ueoa'
-    ], report).url.should == '/render?foo=42&target=baz&aoeu=ueoa'
-    
+      '/render?foo=300'
+    ], report).url.should == '/render?foo=42'
   end
+
+  it 'should be available if getting succeeds' do
+    url = '/render' 
+    conf = test_config
+    store = double('store')
+    store.should_receive(:add)
+    conf.should_receive(:image_store).and_return(store)
+    graph = TokyoPI::Graphite::Graph.new(conf, [ nil, nil, url ])
+    graph.prepare!
+    graph.available?.should be_true
+  end
+
+  it 'should not be available if getting fails' do
+    url = '/render' 
+    conf = test_config
+    store = double('store')
+    store.should_receive(:add).and_raise(TokyoPI::GraphiteException.new)
+    conf.should_receive(:image_store).and_return(store)
+    graph = TokyoPI::Graphite::Graph.new(conf, [ nil, nil, url ])
+    graph.prepare!
+    graph.available?.should be_false
+  end
+
 end

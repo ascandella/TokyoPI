@@ -35,7 +35,11 @@ module TokyoPI
         if @graphs.nil? || @graphs.length == 0
           TokyoPI.log.warn "No graphs fetched for dashboard '#{@name}'"
         else
+          TokyoPI.log.debug "Fetching #{@graphs.length} graphs from graphite"
           @graphs.each { |graph| graph.prepare! }
+          # Filter out ones that failed to fetch properly
+          @graphs.select! { |graph| graph.available? }
+          TokyoPI.log.debug "Successfully fetched #{@graphs.length} graphs"
         end
       end
 

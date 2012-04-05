@@ -6,11 +6,21 @@ module TokyoPI
     class Graph < Configured
       def prepare!
         TokyoPI.log.debug "Fetching graph from url: #{url}"
-        @config.image_store.add(url)
+        begin
+          @config.image_store.add(url)
+          @available = true
+        rescue GraphiteException => ex
+          TokyoPI.log.error "Couldn't add graph image to store: #{ex.inspect}"
+          @available = false
+        end
       end
 
       def url
         url_with_config_options
+      end
+
+      def available?
+        @available
       end
 
       protected

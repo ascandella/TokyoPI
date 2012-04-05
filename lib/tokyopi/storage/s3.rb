@@ -20,6 +20,8 @@ module TokyoPI
         begin
           data = get(url).body
         rescue => ex
+          TokyoPI.log.error "Error storing image to S3: #{ex.inspect}"
+          TokyoPI.log.error "Here's the backtrace: #{ex.backtrace.join("\n")}"
           raise GraphiteException.new(ex)
         end
         unique_url = "images/graphs/#{@config.run_id}/#{key(url)}.png"
